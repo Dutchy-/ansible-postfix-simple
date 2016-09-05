@@ -1,0 +1,6 @@
+# Run postmap /etc/postfix/virtual after changing!!
+# test@example.org unixuserhere
+# everything else
+{% for domain in domains %}
+@{{ domain }} {{ user }}
+{% endfor %}

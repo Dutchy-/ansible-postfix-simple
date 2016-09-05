@@ -1,0 +1,31 @@
+- name: ensure postfix and tools are installed, latest version
+  apt: name={{ item }} state=latest
+  with_items:
+  - postfix
+  - postfix-policyd-spf-python
+
+- name: configure mailname
+  copy: content={{ hostname }} dest=/etc/mailname
+
+- name: Install postfix configuration files
+  template: src={{ item }}.j2 dest=/etc/postfix/{{ item }}
+  with_items:
+  - main.cf
+  - master.cf
+  notify: restart postfix
+
+#- name: Install master.cf based on template
+#  template: src=master.cf.j2 dest=/etc/postfix/master.cf
+
+- name: Install virtual mapping based on template
+  template: src=virtual.j2 dest=/etc/postfix/virtual
+  notify: update postmap
+
+- name: configure smtp ports in firewall
+  ufw: rule=allow port={{ item }} proto=tcp
+  with_items:
+  - smtp
+  - submission
+  notify: restart ufw
+
+
